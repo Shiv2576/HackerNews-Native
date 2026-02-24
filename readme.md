@@ -1,3 +1,6 @@
+# HackerNews-Native
+
+```
 src/
 │
 ├── app/                     # Expo Router (screens)
@@ -44,4 +47,4 @@ src/
 └── theme/
     ├── colors.ts
     └── spacing.ts
-# HackerNews-Native
+```
