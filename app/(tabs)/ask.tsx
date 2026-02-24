@@ -6,8 +6,8 @@ import ErrorView from "@/components/ErrorView";
 import { router } from "expo-router";
 import { colors, spacing } from "@/theme";
 
-export default function TopScreen() {
-  const { stories, loading, error, refetch } = useStories("top");
+export default function AskScreen() {
+  const { stories, loading, error, refetch } = useStories("ask");
 
   if (loading) return <Loader />;
   if (error) return <ErrorView message={error} />;
@@ -22,8 +22,8 @@ export default function TopScreen() {
         refreshControl={
           <RefreshControl
             refreshing={loading}
-            onRefresh={refetch}
             tintColor={colors.primary}
+            onRefresh={refetch}
           />
         }
         renderItem={({ item }) => (
@@ -32,7 +32,7 @@ export default function TopScreen() {
             onPress={() => router.push(`/story/${item.id}`)}
           />
         )}
-        ListEmptyComponent={<ErrorView message="No stories available." />}
+        ListEmptyComponent={<ErrorView message="No stories found." />}
       />
     </View>
   );

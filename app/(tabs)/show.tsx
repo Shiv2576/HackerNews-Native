@@ -6,8 +6,8 @@ import ErrorView from "@/components/ErrorView";
 import { router } from "expo-router";
 import { colors, spacing } from "@/theme";
 
-export default function TopScreen() {
-  const { stories, loading, error, refetch } = useStories("top");
+export default function ShowScreen() {
+  const { stories, loading, error, refetch } = useStories("show");
 
   if (loading) return <Loader />;
   if (error) return <ErrorView message={error} />;
