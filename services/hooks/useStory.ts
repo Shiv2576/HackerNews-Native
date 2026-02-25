@@ -1,31 +1,56 @@
-import { useEffect, useState } from "react";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { getItemDetails } from "../api/endpoints";
 import type { Item } from "@/shared/types";
 
+const COMMENTS_PAGE_SIZE = 20;
+
 export function useStory(id: number | string) {
-  const [story, setStory] = useState<Item | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // 1️⃣ Fetch Story
+  const storyQuery = useQuery({
+    queryKey: ["story", id],
+    queryFn: () => getItemDetails(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
 
-  useEffect(() => {
-    if (!id) return;
+  // 2️⃣ Fetch Comments (Paginated)
+  const commentsQuery = useInfiniteQuery({
+    queryKey: ["storyComments", id],
+    initialPageParam: 0,
+    enabled: !!storyQuery.data?.kids?.length,
 
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
+    queryFn: async ({ pageParam }) => {
+      const kids = storyQuery.data?.kids ?? [];
 
-        const data = await getItemDetails(id);
-        setStory(data);
-      } catch (err: any) {
-        setError(err.message ?? "Failed to fetch story");
-      } finally {
-        setLoading(false);
-      }
-    }
+      const start = pageParam * COMMENTS_PAGE_SIZE;
+      const end = start + COMMENTS_PAGE_SIZE;
+      const slice = kids.slice(start, end);
 
-    load();
-  }, [id]);
+      const comments = await Promise.all(
+        slice.map((commentId: number) => getItemDetails(commentId)),
+      );
 
-  return { story, loading, error };
+      return comments;
+    },
+
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.length === COMMENTS_PAGE_SIZE
+        ? allPages.length
+        : undefined;
+    },
+  });
+
+  return {
+    story: storyQuery.data,
+    comments: commentsQuery.data?.pages.flat() ?? [],
+
+    isLoading: storyQuery.isLoading,
+    isError: storyQuery.isError,
+
+    fetchMoreComments: commentsQuery.fetchNextPage,
+    hasMoreComments: commentsQuery.hasNextPage,
+    isFetchingMoreComments: commentsQuery.isFetchingNextPage,
+
+    refetch: storyQuery.refetch,
+  };
 }

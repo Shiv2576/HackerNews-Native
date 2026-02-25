@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   getTopStories,
   getBestStories,
@@ -10,53 +10,44 @@ import type { Item } from "@/shared/types";
 
 type StoryType = "top" | "best" | "ask" | "show";
 
+const PAGE_SIZE = 30;
+
+async function getStoryIds(type: StoryType): Promise<number[]> {
+  switch (type) {
+    case "top":
+      return getTopStories();
+    case "best":
+      return getBestStories();
+    case "ask":
+      return getAskStories();
+    case "show":
+      return getShowStories();
+  }
+}
+
 export function useStories(type: StoryType) {
-  const [stories, setStories] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  return useInfiniteQuery({
+    queryKey: ["stories", type],
 
-  const fetchStories = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    initialPageParam: 0,
 
-      let ids: number[] = [];
+    queryFn: async ({ pageParam }) => {
+      const ids = await getStoryIds(type);
 
-      switch (type) {
-        case "top":
-          ids = await getTopStories();
-          break;
-        case "best":
-          ids = await getBestStories();
-          break;
-        case "ask":
-          ids = await getAskStories();
-          break;
-        case "show":
-          ids = await getShowStories();
-          break;
-      }
+      const start = pageParam * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const slice = ids.slice(start, end);
 
-      const firstTen = ids.slice(0, 10);
+      const items = await Promise.all(slice.map((id) => getItemDetails(id)));
 
-      const items = await Promise.all(firstTen.map((id) => getItemDetails(id)));
+      return items;
+    },
 
-      setStories(items);
-    } catch (err: any) {
-      setError(err?.message ?? "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  }, [type]);
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.length === PAGE_SIZE ? allPages.length : undefined;
+    },
 
-  useEffect(() => {
-    fetchStories();
-  }, [fetchStories]);
-
-  return {
-    stories,
-    loading,
-    error,
-    refetch: fetchStories,
-  };
+    staleTime: 1000 * 60 * 5,
+    retry: 2,
+  });
 }

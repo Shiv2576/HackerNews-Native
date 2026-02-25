@@ -14,9 +14,12 @@ src/
 │   ├── story/
 │   │   └── [id].tsx         # Story details screen
 │   │
-│   └── user/
-│       └── [id].tsx         # User profile screen
-│
+│   ├── user/
+│   │    └── [id].tsx         # User profile screen
+│   │
+│   ├── layout.tsx
+│              
+│   
 ├── shared/
 │   ├── types.ts             # Item, User types
 │   └── constants.ts

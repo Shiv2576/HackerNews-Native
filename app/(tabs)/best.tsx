@@ -1,41 +1,64 @@
-import { View, Text, StyleSheet } from "react-native";
-import { colors, spacing } from "@/theme";
+import { StyleSheet, FlatList, RefreshControl } from "react-native";
+import { colors } from "@/theme";
+import { useStories } from "@/services/hooks/useStories";
+import StoryCard from "@/components/StoryCard";
+import Loader from "@/components/Loader";
+import ErrorView from "@/components/ErrorView";
+import { useState } from "react";
 
-export default function TabTwoScreen() {
+export default function BestScreen() {
+  const {
+    data,
+    isLoading,
+    isError,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useStories("best");
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  // 🔥 Flatten paginated data
+  const stories = data?.pages?.flat() ?? [];
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+
+  if (isLoading) return <Loader />;
+  if (isError) return <ErrorView message="Failed to load stories." />;
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-
-      <View style={styles.separator} />
-
-      <Text style={styles.description}>This is the second tab screen.</Text>
-    </View>
+    <FlatList
+      data={stories}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => <StoryCard story={item} />}
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing || isRefetching}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+        />
+      }
+      onEndReached={() => {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      }}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={isFetchingNextPage ? <Loader /> : null}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  content: {
+    paddingVertical: 12,
     backgroundColor: colors.background,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: spacing.lg,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: colors.primary,
-    marginBottom: spacing.md,
-  },
-  separator: {
-    height: 1,
-    width: "80%",
-    backgroundColor: colors.border,
-    marginVertical: spacing.lg,
-  },
-  description: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: "center",
   },
 });
