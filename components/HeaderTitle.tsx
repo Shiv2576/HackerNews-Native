@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Image } from "react-native";
-import { colors, spacing } from "@/theme";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
+import { colors } from "@/theme";
 
 export default function HeaderTitle() {
   return (
@@ -28,9 +28,9 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 25,
-    height: 25,
-    marginLeft: 145,
+    width: 35,
+    height: 35,
+    marginLeft: 35,
   },
 
   text: {

@@ -14,11 +14,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "bundleIdentifier": "com.shiva.hnnews",
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/HackerNews.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
