@@ -11,6 +11,10 @@ export const getAskStories = () => apiFetch<number[]>("/askstories.json");
 
 export const getShowStories = () => apiFetch<number[]>("/showstories.json");
 
+export const getNewStories = () => apiFetch<number[]>("/newstories.json");
+
+export const getJobStories = () => apiFetch<number[]>("/jobstories.json");
+
 // ---- Single Item ----
 
 export const getItemDetails = (id: number | string) =>
