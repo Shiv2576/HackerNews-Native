@@ -5,10 +5,11 @@ import {
   getAskStories,
   getShowStories,
   getItemDetails,
+  getJobStories,
+  getNewStories,
 } from "../api/endpoints";
-import type { Item } from "@/shared/types";
 
-type StoryType = "top" | "best" | "ask" | "show";
+type StoryType = "top" | "best" | "ask" | "show" | "job" | "new";
 
 const PAGE_SIZE = 30;
 
@@ -22,6 +23,10 @@ async function getStoryIds(type: StoryType): Promise<number[]> {
       return getAskStories();
     case "show":
       return getShowStories();
+    case "job":
+      return getJobStories();
+    case "new":
+      return getNewStories();
   }
 }
 
